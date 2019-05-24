@@ -9,7 +9,7 @@ function run(args, done) {
   }).on('close', done);
 }
 
-export function checkIfRestartNeeded() {
+function check() {
   if (process.platform === 'win32') {
     const cmd = process.argv[1];
     console.log('processing squirrel command `%s`', cmd);
@@ -37,3 +37,5 @@ export function checkIfRestartNeeded() {
   }
   return false;
 }
+
+module.exports = check();

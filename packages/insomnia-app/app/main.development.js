@@ -1,5 +1,5 @@
 // @flow
-import { checkIfRestartNeeded } from './main/squirrel-startup';
+import needsRestart from './main/squirrel-startup';
 import * as electron from 'electron';
 import * as errorHandling from './main/error-handling';
 import * as updates from './main/updates';
@@ -11,7 +11,7 @@ import type { ToastNotification } from './ui/components/toast';
 import type { Stats } from './models/stats';
 
 // Handle potential auto-update
-if (checkIfRestartNeeded()) {
+if (needsRestart) {
   process.exit(0);
 }
 
