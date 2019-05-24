@@ -79,7 +79,7 @@ export function init(): BaseSettings {
     updateAutomatically: true,
     disableUpdateNotification: false,
     environmentHighlightColorStyle: 'sidebar-indicator',
-    autocompleteDelay: 1200,
+    autocompleteDelay: 700,
     fontMonospace: null,
     fontInterface: null,
     fontSize: 13,
