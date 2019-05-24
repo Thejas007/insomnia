@@ -2,7 +2,7 @@ const { jarFromCookies, cookiesFromJar } = require('insomnia-cookies');
 const tag = require('..').templateTags[0];
 
 describe('plugin', () => {
-  describe('CookieJarPlugin: no cookies for url', () => {
+  describe('CookieJarPlugin: no cookies for url', async () => {
     it('should get cookie by name', async () => {
       const jar = jarFromCookies([]);
       jar.setCookieSync(
@@ -20,14 +20,14 @@ describe('plugin', () => {
       const jars = [{ _id: 'jar_1', parentId: 'wrk_1', cookies }];
       const context = _getTestContext([{ _id: 'wrk_1' }], requests, jars);
       try {
-        await tag.run(context, 'https://google.com/', '');
+        const result = await tag.run(context, 'https://google.com/', '');
       } catch (err) {
         expect(err.message).toContain('No cookies in store for url "https://google.com/');
       }
     });
   });
 
-  describe('CookieJarPlugin: cookie not found', () => {
+  describe('CookieJarPlugin: cookie not found', async () => {
     it('should get cookie by name', async () => {
       const jar = jarFromCookies([]);
       jar.setCookieSync(
@@ -45,7 +45,7 @@ describe('plugin', () => {
       const jars = [{ _id: 'jar_1', parentId: 'wrk_1', cookies }];
       const context = _getTestContext([{ _id: 'wrk_1' }], requests, jars);
       try {
-        await tag.run(context, 'https://insomnia.rest', 'bar');
+        const result = await tag.run(context, 'https://insomnia.rest', 'bar');
       } catch (err) {
         expect(err.message).toContain('No cookie with name "bar"');
         expect(err.message).toContain('"foo"');
@@ -53,7 +53,7 @@ describe('plugin', () => {
     });
   });
 
-  describe('CookieJarPlugin: cookie name found', () => {
+  describe('CookieJarPlugin: cookie name found', async () => {
     it('should get cookie by name', async () => {
       const jar = jarFromCookies([]);
       jar.setCookieSync(

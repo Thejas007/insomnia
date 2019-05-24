@@ -25,7 +25,7 @@ describe('init()', () => {
   });
 });
 
-describe('create()', () => {
+describe('create()', async () => {
   beforeEach(globalBeforeEach);
   it('creates a valid request', async () => {
     Date.now = jest.fn().mockReturnValue(1478795580200);
@@ -70,7 +70,7 @@ describe('create()', () => {
   });
 });
 
-describe('updateMimeType()', () => {
+describe('updateMimeType()', async () => {
   beforeEach(globalBeforeEach);
   it('adds header when does not exist', async () => {
     const request = await models.request.create({

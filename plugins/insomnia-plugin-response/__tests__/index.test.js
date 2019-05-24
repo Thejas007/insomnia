@@ -192,7 +192,7 @@ describe('Response tag', () => {
     });
   });
 
-  describe('XPath', () => {
+  describe('XPath', async () => {
     it('renders basic response "body" query', async () => {
       const requests = [{ _id: 'req_1', parentId: 'wrk_1' }];
 
@@ -343,7 +343,7 @@ describe('Response tag', () => {
     });
   });
 
-  describe('ResponseExtension Header', () => {
+  describe('ResponseExtension Header', async () => {
     it('renders basic response "header"', async () => {
       const requests = [{ _id: 'req_1', parentId: 'wrk_1' }];
 
@@ -399,7 +399,7 @@ describe('Response tag', () => {
     });
   });
 
-  describe('Raw', () => {
+  describe('Raw', async () => {
     it('renders basic response', async () => {
       const requests = [{ _id: 'req_1', parentId: 'wrk_1' }];
 
@@ -428,18 +428,7 @@ function _genTestContext(requests, responses) {
     bodies[res._id] = res._body || null;
     delete res._body;
   }
-  const store = {};
   return {
-    store: {
-      hasItem: key => store.hasOwnProperty(key),
-      getItem: key => store[key],
-      removeItem: key => {
-        delete store[key];
-      },
-      setItem: (key, value) => {
-        store[key] = value;
-      },
-    },
     util: {
       models: {
         request: {
