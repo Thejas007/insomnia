@@ -42,7 +42,6 @@ type State = {
   disableInput: boolean,
   selectOnKeyup: boolean,
   hideNeverActiveRequests: boolean,
-  isModalVisible: boolean,
   title: string | null,
 };
 
@@ -66,7 +65,6 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
       disableInput: false,
       selectOnKeyup: false,
       hideNeverActiveRequests: false,
-      isModalVisible: true,
       title: null,
     };
   }
@@ -215,7 +213,7 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
     return match.score;
   }
 
-  _handleChangeValue(searchString: string) {
+  async _handleChangeValue(searchString: string) {
     const { workspace, workspaceChildren, workspaces, requestMetas, activeRequest } = this.props;
     const { maxRequests, maxWorkspaces, hideNeverActiveRequests } = this.state;
 
@@ -286,37 +284,24 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
       openDelay?: number,
     } = {},
   ) {
-    // Don't show if we're already showing
     if (this.modal && this.modal.isOpen()) {
       return;
     }
 
-    const newState = {
+    this.setState({
       maxRequests: typeof options.maxRequests === 'number' ? options.maxRequests : 20,
       maxWorkspaces: typeof options.maxWorkspaces === 'number' ? options.maxWorkspaces : 20,
       disableInput: !!options.disableInput,
       hideNeverActiveRequests: !!options.hideNeverActiveRequests,
       selectOnKeyup: !!options.selectOnKeyup,
       title: options.title || null,
-      isModalVisible: false,
-    };
-
-    // Using a visibility toggle here because we want to be able to interact with everything
-    // here via keyboard BEFORE the modal shows.
-    if (options.openDelay) {
-      this._openTimeout = setTimeout(() => {
-        this.setState({ isModalVisible: true });
-      }, options.openDelay);
-    } else {
-      newState.isModalVisible = true;
-    }
-
-    this.setState(newState, () => {
-      // Change value after because it accesses state properties
-      this._handleChangeValue('');
     });
 
-    this.modal && this.modal.show();
+    await this._handleChangeValue('');
+
+    this._openTimeout = setTimeout(() => {
+      this.modal && this.modal.show();
+    }, options.openDelay || 0);
 
     setTimeout(() => this._input && this._input.focus(), 100);
   }
@@ -340,31 +325,23 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
       return;
     }
 
-    // Only control up/down with tab if modal is visible
     executeHotKey(e, hotKeyRefs.SHOW_RECENT_REQUESTS, () => {
-      if (this.state.isModalVisible) {
-        this._setActiveIndex(this.state.activeIndex + 1);
-      }
+      this._setActiveIndex(this.state.activeIndex + 1);
     });
 
-    // Only control up/down with tab if modal is visible
     executeHotKey(e, hotKeyRefs.SHOW_RECENT_REQUESTS_PREVIOUS, () => {
-      if (this.state.isModalVisible) {
-        this._setActiveIndex(this.state.activeIndex - 1);
-      }
+      this._setActiveIndex(this.state.activeIndex - 1);
     });
   }
 
-  async _handleKeyup(e: KeyboardEvent) {
+  _handleKeyup(e: KeyboardEvent) {
     const { selectOnKeyup } = this.state;
 
     // Handle selection if unpresses all modifier keys. Ideally this would trigger once
     // the user unpresses the hotkey that triggered this modal but we currently do not
     // have the facilities to do that.
-    const isMetaKeyDown = e.ctrlKey || e.shiftKey || e.metaKey || e.altKey;
-    const isActive = this.modal && this.modal.isOpen();
-    if (selectOnKeyup && isActive && !isMetaKeyDown) {
-      await this._activateCurrentIndex();
+    if (selectOnKeyup && !e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey) {
+      this._activateCurrentIndex();
       this.hide();
     }
   }
@@ -377,7 +354,6 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
       matchedWorkspaces,
       disableInput,
       title,
-      isModalVisible,
     } = this.state;
 
     const { workspaceChildren } = this.props;
@@ -385,10 +361,7 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
 
     return (
       <KeydownBinder onKeydown={this._handleKeydown} onKeyup={this._handleKeyup}>
-        <Modal
-          ref={this._setModalRef}
-          dontFocus={!disableInput}
-          className={isModalVisible ? '' : 'hide'}>
+        <Modal ref={this._setModalRef} dontFocus={!disableInput}>
           <ModalHeader hideCloseButton>
             {title || (
               <React.Fragment>
