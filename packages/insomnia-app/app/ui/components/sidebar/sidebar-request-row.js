@@ -80,7 +80,7 @@ class SidebarRequestRow extends PureComponent {
       requestGroup,
       isActive,
       isPinned,
-      disableDragAndDrop,
+      isDragAndDropEnabled,
       hotKeyRegistry,
     } = this.props;
 
@@ -153,7 +153,7 @@ class SidebarRequestRow extends PureComponent {
       );
     }
 
-    if (disableDragAndDrop) {
+    if (!isDragAndDropEnabled) {
       return node;
     } else if (!this.state.isEditing) {
       return connectDragSource(connectDropTarget(node));
@@ -177,6 +177,7 @@ SidebarRequestRow.propTypes = {
   filter: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,
   isPinned: PropTypes.bool.isRequired,
+  isDragAndDropEnabled: PropTypes.bool.isRequired,
   hotKeyRegistry: PropTypes.object.isRequired,
 
   // React DnD
@@ -188,7 +189,6 @@ SidebarRequestRow.propTypes = {
   // Optional
   requestGroup: PropTypes.object,
   request: PropTypes.object,
-  disableDragAndDrop: PropTypes.bool,
 };
 
 const dragSource = {
