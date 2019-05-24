@@ -3,7 +3,7 @@ import type { ResponseHeader, ResponseTimelineEntry } from '../models/response';
 import type { Request, RequestHeader } from '../models/request';
 import type { Workspace } from '../models/workspace';
 import type { Settings } from '../models/settings';
-import type { ExtraRenderInfo, RenderedRequest } from '../common/render';
+import type { RenderedRequest } from '../common/render';
 import {
   getRenderedRequestAndContext,
   RENDER_PURPOSE_NO_RENDER,
@@ -33,7 +33,6 @@ import {
   delay,
   describeByteSize,
   getContentTypeHeader,
-  getDataDirectory,
   getHostHeader,
   getLocationHeader,
   getSetCookieHeaders,
@@ -43,6 +42,7 @@ import {
   hasContentTypeHeader,
   hasUserAgentHeader,
   waitForStreamToFinish,
+  getDataDirectory,
 } from '../common/misc';
 import {
   buildQueryStringFromParams,
@@ -809,10 +809,7 @@ export async function sendWithSettings(
 export async function send(
   requestId: string,
   environmentId: string | null,
-  extraInfo?: ExtraRenderInfo,
 ): Promise<ResponsePatch> {
-  console.log(`[network] Sending req=${requestId}`);
-
   // HACK: wait for all debounces to finish
   /*
    * TODO: Do this in a more robust way
@@ -844,7 +841,6 @@ export async function send(
     request,
     environmentId,
     RENDER_PURPOSE_SEND,
-    extraInfo,
   );
 
   const renderedRequestBeforePlugins = renderResult.request;
@@ -874,20 +870,7 @@ export async function send(
     };
   }
 
-  const response = await _actuallySend(
-    renderedRequest,
-    renderedContextBeforePlugins,
-    workspace,
-    settings,
-  );
-
-  console.log(
-    response.error
-      ? `[network] Response failed req=${requestId} err=${response.error || 'n/a'}`
-      : `[network] Response succeeded req=${requestId} status=${response.statusCode || '?'}`,
-  );
-
-  return response;
+  return _actuallySend(renderedRequest, renderedContextBeforePlugins, workspace, settings);
 }
 
 async function _applyRequestPluginHooks(
