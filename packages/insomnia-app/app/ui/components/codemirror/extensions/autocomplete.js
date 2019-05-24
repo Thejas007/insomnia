@@ -414,14 +414,15 @@ function renderHintMatch(li, self, data) {
   const markedName = replaceWithSurround(displayText, segment, '<strong>', '</strong>');
 
   const { char, title } = ICONS[data.type];
-  const safeValue = escapeHTML(data.displayValue);
 
-  li.className += ` fancy-hint type--${data.type}`;
-  li.innerHTML = `
+  let html = `
     <label class="label" title="${title}">${char}</label>
     <div class="name">${markedName}</div>
-    <div class="value" title=${safeValue}>
-      ${safeValue}
+    <div class="value" title=${data.displayValue}>
+      ${escapeHTML(data.displayValue || '')}
     </div>
   `;
+
+  li.innerHTML = html;
+  li.className += ` fancy-hint type--${data.type}`;
 }
