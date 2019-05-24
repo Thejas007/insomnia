@@ -128,7 +128,6 @@ type Props = {
   activeEnvironment: Environment | null,
   activeWorkspaceClientCertificates: Array<ClientCertificate>,
   isVariableUncovered: boolean,
-  headerEditorKey: string,
   vcs: VCS | null,
   syncItems: Array<StatusCandidate>,
 
@@ -430,7 +429,6 @@ class Wrapper extends React.PureComponent<Props, State> {
       unseenWorkspaces,
       isVariableUncovered,
       vcs,
-      headerEditorKey,
     } = this.props;
 
     const realSidebarWidth = sidebarHidden ? 0 : sidebarWidth;
@@ -733,7 +731,6 @@ class Wrapper extends React.PureComponent<Props, State> {
             handleSendAndDownload={this._handleSendAndDownloadRequestWithActiveEnvironment}
             nunjucksPowerUserMode={settings.nunjucksPowerUserMode}
             isVariableUncovered={isVariableUncovered}
-            headerEditorKey={headerEditorKey}
           />
         </ErrorBoundary>
 

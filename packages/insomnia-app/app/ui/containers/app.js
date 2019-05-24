@@ -90,7 +90,6 @@ class App extends PureComponent {
       isVariableUncovered: props.isVariableUncovered || false,
       vcs: null,
       forceRefreshCounter: 0,
-      forceRefreshHeaderCounter: 0,
     };
 
     this._isMigratingChildren = false;
@@ -509,9 +508,7 @@ class App extends PureComponent {
 
     // Force it to update, because other editor components (header editor)
     // needs to change. Need to wait a delay so the next render can finish
-    setTimeout(() => {
-      this.setState({ forceRefreshHeaderCounter: this.state.forceRefreshHeaderCounter + 1 });
-    }, 500);
+    setTimeout(this._wrapper._forceRequestPaneRefresh, 300);
 
     return newRequest;
   }
@@ -1054,7 +1051,6 @@ class App extends PureComponent {
       isVariableUncovered,
       vcs,
       forceRefreshCounter,
-      forceRefreshHeaderCounter,
     } = this.state;
 
     const uniquenessKey = `${forceRefreshCounter}::${activeWorkspace._id}`;
@@ -1107,7 +1103,6 @@ class App extends PureComponent {
               handleUpdateRequestMimeType={this._handleUpdateRequestMimeType}
               handleShowExportRequestsModal={this._handleShowExportRequestsModal}
               isVariableUncovered={isVariableUncovered}
-              headerEditorKey={forceRefreshHeaderCounter + ''}
               vcs={vcs}
             />
           </ErrorBoundary>

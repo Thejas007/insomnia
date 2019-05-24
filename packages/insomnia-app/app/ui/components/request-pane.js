@@ -60,7 +60,6 @@ type Props = {
   isVariableUncovered: boolean,
   environmentId: string,
   forceRefreshCounter: number,
-  headerEditorKey: string,
 
   // Optional
   request: ?Request,
@@ -166,7 +165,6 @@ class RequestPane extends React.PureComponent<Props> {
       updateSettingsShowPasswords,
       updateRequestMethod,
       updateRequestUrl,
-      headerEditorKey,
     } = this.props;
 
     const paneClasses = 'request-pane theme--pane pane';
@@ -389,7 +387,6 @@ class RequestPane extends React.PureComponent<Props> {
           <TabPanel className="react-tabs__tab-panel header-editor">
             <ErrorBoundary key={uniqueKey} errorClassName="font-error pad text-center">
               <RequestHeadersEditor
-                key={headerEditorKey}
                 handleRender={handleRender}
                 handleGetRenderContext={handleGetRenderContext}
                 nunjucksPowerUserMode={settings.nunjucksPowerUserMode}
