@@ -19,7 +19,6 @@ import { hotKeyRefs } from '../../../common/hotkeys';
 import { executeHotKey } from '../../../common/hotkeys-listener';
 import KeydownBinder from '../keydown-binder';
 import type { RequestMeta } from '../../../models/request-meta';
-import { keyboardKeys } from '../../../common/keyboard-keys';
 
 type Props = {
   handleSetActiveWorkspace: (id: string) => void,
@@ -48,11 +47,12 @@ type State = {
 class RequestSwitcherModal extends React.PureComponent<Props, State> {
   modal: ?Modal;
   _input: ?HTMLInputElement;
-  _openTimeout: TimeoutID;
+  _keysPressed: { [string]: boolean };
 
   constructor(props: Props) {
     super(props);
 
+    this._keysPressed = {};
     this.state = {
       searchString: '',
       workspaces: [],
@@ -272,7 +272,6 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
       disableInput?: boolean,
       selectOnKeyup?: boolean,
       title?: string,
-      openDelay?: number,
     } = {},
   ) {
     if (this.modal && this.modal.isOpen()) {
@@ -289,15 +288,12 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
 
     await this._handleChangeValue('');
 
-    this._openTimeout = setTimeout(() => {
-      this.modal && this.modal.show();
-    }, options.openDelay || 0);
+    this.modal && this.modal.show();
 
     setTimeout(() => this._input && this._input.focus(), 100);
   }
 
   hide() {
-    clearTimeout(this._openTimeout);
     this.modal && this.modal.hide();
   }
 
@@ -309,13 +305,13 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
     }
   }
 
-  _handleKeydown(e: KeyboardEvent) {
-    if (e.keyCode === keyboardKeys.esc.keyCode) {
-      this.hide();
-      console.log('hide');
-      return;
-    }
+  _handleHide() {
+    // Safety net in case we miss a keyup or something.
+    this._keysPressed = {};
+  }
 
+  _handleKeydown(e: KeyboardEvent) {
+    this._keysPressed[e.keyCode + ''] = true;
     executeHotKey(e, hotKeyRefs.SHOW_RECENT_REQUESTS, () => {
       this._setActiveIndex(this.state.activeIndex + 1);
     });
@@ -328,10 +324,9 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
   _handleKeyup(e: KeyboardEvent) {
     const { selectOnKeyup } = this.state;
 
-    // Handle selection if unpresses all modifier keys. Ideally this would trigger once
-    // the user unpresses the hotkey that triggered this modal but we currently do not
-    // have the facilities to do that.
-    if (selectOnKeyup && !e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey) {
+    delete this._keysPressed[e.keyCode + ''];
+
+    if (selectOnKeyup && Object.keys(this._keysPressed).length === 0) {
       this._activateCurrentIndex();
       this.hide();
     }
@@ -352,7 +347,7 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
 
     return (
       <KeydownBinder onKeydown={this._handleKeydown} onKeyup={this._handleKeyup}>
-        <Modal ref={this._setModalRef} dontFocus={!disableInput}>
+        <Modal ref={this._setModalRef} dontFocus={!disableInput} onHide={this._handleHide}>
           <ModalHeader hideCloseButton>
             {title || (
               <React.Fragment>
