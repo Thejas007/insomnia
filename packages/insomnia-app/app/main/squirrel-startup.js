@@ -4,30 +4,36 @@ import { app } from 'electron';
 
 function run(args, done) {
   const updateExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
-  spawn(updateExe, args, { detached: true }).on('close', done);
+  spawn(updateExe, args, {
+    detached: true,
+  }).on('close', done);
 }
 
 export function checkIfRestartNeeded() {
   if (process.platform === 'win32') {
-    return false;
-  }
+    const cmd = process.argv[1];
+    console.log('processing squirrel command `%s`', cmd);
+    const target = path.basename(process.execPath);
 
-  const cmd = process.argv[1];
-  console.log('processing squirrel command `%s`', cmd);
-  const target = path.basename(process.execPath);
-
-  switch (cmd) {
-    case '--squirrel-install':
+    if (cmd === '--squirrel-install') {
       run(['--createShortcut=' + target + ''], app.quit);
       return true;
-    case '--squirrel-uninstall':
-      run(['--removeShortcut=' + target + ''], app.quit);
-      return true;
-    case '--squirrel-updated':
-    case '--squirrel-obsolete':
+    }
+
+    if (cmd === '--squirrel-updated') {
       app.quit();
       return true;
-  }
+    }
 
+    if (cmd === '--squirrel-uninstall') {
+      run(['--removeShortcut=' + target + ''], app.quit);
+      return true;
+    }
+
+    if (cmd === '--squirrel-obsolete') {
+      app.quit();
+      return true;
+    }
+  }
   return false;
 }
