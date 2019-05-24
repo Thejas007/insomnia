@@ -259,7 +259,7 @@ class RequestSwitcherModal extends React.PureComponent<Props, State> {
 
     this.setState({
       searchString,
-      activeIndex: indexOfFirstNonActiveRequest >= 0 ? indexOfFirstNonActiveRequest : 0,
+      activeIndex: indexOfFirstNonActiveRequest,
       matchedRequests: (matchedRequests: Array<any>).slice(0, maxRequests),
       matchedWorkspaces: matchedWorkspaces.slice(0, maxWorkspaces),
     });
