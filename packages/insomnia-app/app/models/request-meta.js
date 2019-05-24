@@ -1,26 +1,11 @@
-// @flow
 import * as db from '../common/database';
 import { PREVIEW_MODE_FRIENDLY } from '../common/constants';
-import type { BaseModel } from './index';
 
 export const name = 'Request Meta';
 export const type = 'RequestMeta';
 export const prefix = 'reqm';
 export const canDuplicate = false;
 export const canSync = false;
-
-type BaseRequestMeta = {
-  parentId: string,
-  previewMode: string,
-  responseFilter: string,
-  responseFilterHistory: Array<string>,
-  activeResponseId: string | null,
-  savedRequestBody: Object,
-  pinned: boolean,
-  lastActive: number,
-};
-
-export type RequestMeta = BaseModel & BaseRequestMeta;
 
 export function init() {
   return {
@@ -31,31 +16,30 @@ export function init() {
     activeResponseId: null,
     savedRequestBody: {},
     pinned: false,
-    lastActive: 0,
   };
 }
 
-export function migrate(doc: RequestMeta): RequestMeta {
+export function migrate(doc) {
   return doc;
 }
 
-export function create(patch: Object = {}) {
+export function create(patch = {}) {
   if (!patch.parentId) {
-    throw new Error('New RequestMeta missing `parentId` ' + JSON.stringify(patch));
+    throw new Error('New RequestMeta missing `parentId`', patch);
   }
 
   return db.docCreate(type, patch);
 }
 
-export function update(requestMeta: RequestMeta, patch: Object) {
+export function update(requestMeta, patch) {
   return db.docUpdate(requestMeta, patch);
 }
 
-export function getByParentId(parentId: string) {
+export function getByParentId(parentId) {
   return db.getWhere(type, { parentId });
 }
 
-export async function getOrCreateByParentId(parentId: string) {
+export async function getOrCreateByParentId(parentId) {
   const requestMeta = await getByParentId(parentId);
 
   if (requestMeta) {
@@ -65,6 +49,6 @@ export async function getOrCreateByParentId(parentId: string) {
   return create({ parentId });
 }
 
-export function all(): Promise<Array<RequestMeta>> {
+export function all() {
   return db.all(type);
 }
