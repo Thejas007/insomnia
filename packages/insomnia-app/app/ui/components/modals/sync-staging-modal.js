@@ -277,7 +277,6 @@ class SyncStagingModal extends React.PureComponent<Props, State> {
                   name
                 </label>
               </th>
-              <th className="text-right ">Changes</th>
               <th className="text-right">Description</th>
             </tr>
           </thead>
@@ -302,7 +301,6 @@ class SyncStagingModal extends React.PureComponent<Props, State> {
                       {entry.name}
                     </label>
                   </td>
-                  <td className="text-right">{changes ? changes.join(', ') : '--'}</td>
                   <td className="text-right">
                     {SyncStagingModal.renderOperation(entry, type, changes || [])}
                   </td>

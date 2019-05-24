@@ -73,10 +73,6 @@ export default class VCS {
     await this._storeProject(project);
   }
 
-  hasProject(): boolean {
-    return this._project !== null;
-  }
-
   async removeProjectsForRoot(rootDocumentId: string): Promise<void> {
     const all = await this._allProjects();
     const toRemove = all.filter(p => p.rootDocumentId === rootDocumentId);
@@ -85,18 +81,10 @@ export default class VCS {
     }
   }
 
-  async switchProject(rootDocumentId: string): Promise<void> {
-    const project = await this._getProjectByRootDocument(rootDocumentId);
-    if (project !== null) {
-      await this.setProject(project);
-    } else {
-      this._project = null;
-    }
-  }
-
-  async switchAndCreateProjectIfNotExist(rootDocumentId: string, name: string): Promise<void> {
-    const project = await this._getOrCreateProjectByRootDocument(rootDocumentId, name);
+  async switchProject(rootDocumentId: string, name: string): Promise<Project> {
+    const project = await this._getOrCreateProject(rootDocumentId, name);
     await this.setProject(project);
+    return project;
   }
 
   async teams(): Promise<Array<Team>> {
@@ -1181,7 +1169,7 @@ export default class VCS {
         name: workspaceName,
         key: encSymmetricKey,
       },
-      'switchAndCreateProjectIfNotExist',
+      'createProject',
     );
 
     console.log(`[sync] Created remote project ${projectCreate.id} (${projectCreate.name})`);
@@ -1190,8 +1178,7 @@ export default class VCS {
   }
 
   async _getProject(): Promise<Project | null> {
-    const projectId = this._project ? this._project.id : 'n/a';
-    return this._store.getItem(paths.project(projectId));
+    return this._store.getItem(paths.project(this._projectId()));
   }
 
   async _getProjectById(id: string): Promise<Project | null> {
@@ -1311,9 +1298,13 @@ export default class VCS {
     return branch;
   }
 
-  async _getProjectByRootDocument(rootDocumentId: string): Promise<Project | null> {
+  async _getOrCreateProject(rootDocumentId: string, name: string): Promise<Project> {
     if (!rootDocumentId) {
       throw new Error('No root document ID supplied for project');
+    }
+
+    if (!name) {
+      throw new Error('No name supplied for project');
     }
 
     // First, try finding the project
@@ -1342,18 +1333,13 @@ export default class VCS {
       throw new Error('More than one project matched query');
     }
 
-    return matchedProjects[0] || null;
-  }
-
-  async _getOrCreateProjectByRootDocument(rootDocumentId: string, name: string): Promise<Project> {
-    let project: Project | null = await this._getProjectByRootDocument(rootDocumentId);
+    let project: Project | null = matchedProjects[0] || null;
 
     // If we still don't have a project, create one
     if (!project) {
       const id = generateId('prj');
       project = { id, name, rootDocumentId };
       await this._storeProject(project);
-      console.log(`[sync] Created project ${project.id}`);
     }
 
     return project;
